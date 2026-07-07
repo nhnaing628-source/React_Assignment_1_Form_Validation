@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase'; // Folder Structure အတိုင်း ပတ်လမ်းကြောင်း
+import { db } from '../../firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 const Registration = ({ onLogout }) => {
     const [students, setStudents] = useState([]);
-    const [searchTerm, setSearchTerm] = useState(''); // Search Filter အတွက် State
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // ➕ Add Form States (အချက်အလက် ၈ ခု)
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [email, setEmail] = useState('');
@@ -16,7 +15,6 @@ const Registration = ({ onLogout }) => {
     const [major, setMajor] = useState('');
     const [gender, setGender] = useState('');
 
-    // 🔄 Update Form States (Edit Mode အတွက်)
     const [editingId, setEditingId] = useState(null);
     const [editName, setEditName] = useState('');
     const [editAddress, setEditAddress] = useState('');
@@ -27,7 +25,6 @@ const Registration = ({ onLogout }) => {
     const [editMajor, setEditMajor] = useState('');
     const [editGender, setEditGender] = useState('');
 
-    // 📡 ၁။ Real-time Listener: Firebase နှင့် အမြဲတမ်း ချိတ်ဆက်ထားခြင်း
     useEffect(() => {
         const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -37,7 +34,6 @@ const Registration = ({ onLogout }) => {
         return () => unsubscribe();
     }, []);
 
-    // ➕ ၂။ Add Function: ကျောင်းသားအသစ်ကို Firebase Firestore သို့ သိမ်းဆည်းခြင်း
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
@@ -45,13 +41,12 @@ const Registration = ({ onLogout }) => {
                 name, address, email, phone, hobby, university, major, gender,
                 createdAt: new Date()
             });
-            // Form Variables ကို Reset ပြန်ချခြင်း
+     
             setName(''); setAddress(''); setEmail(''); setPhone('');
             setHobby(''); setUniversity(''); setMajor(''); setGender('');
         } catch (error) { console.error(error); }
     };
 
-    // ✏️ ၃။ Edit Mode ဖွင့်ခြင်း (ဒေတာများကို Form ထဲသို့ ကူးထည့်ခြင်း)
     const startEdit = (student) => {
         setEditingId(student.id);
         setEditName(student.name);
@@ -64,7 +59,6 @@ const Registration = ({ onLogout }) => {
         setEditGender(student.gender || '');
     };
 
-    // 🔄 ၄။ Update Function: ပြင်ဆင်ချက်များကို Firebase တွင် သွားရောက်ပြောင်းလဲခြင်း
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
@@ -79,18 +73,16 @@ const Registration = ({ onLogout }) => {
                 major: editMajor,
                 gender: editGender
             });
-            setEditingId(null); // Edit Mode ပိတ်မည်
+            setEditingId(null);
         } catch (error) { console.error(error); }
     };
 
-    // 🗑️ ၅။ Delete Function: Firebase ထဲမှ အပြီးပိုင် ဖျက်ချခြင်း
     const handleDelete = async (id, studentName) => {
         if (window.confirm(`Are you sure you want to delete ${studentName}?`)) {
             try { await deleteDoc(doc(db, "students", id)); } catch (error) { console.error(error); }
         }
     };
 
-    // 🔍 ၆။ Search Filter Logic: ရိုက်လိုက်တဲ့စာလုံးပေါ်မူတည်ပြီး List ကို ချက်ချင်းစစ်ထုတ်ပေးခြင်း
     const filteredStudents = students.filter(student => {
         const term = searchTerm.toLowerCase();
         return (
@@ -103,14 +95,12 @@ const Registration = ({ onLogout }) => {
 
     return (
         <div style={styles.container}>
-            {/* Topbar */}
             <div style={styles.header}>
                 <h3 style={{ color: '#fff', margin: 0 }}>Student Management Workspace (Live CRUD)</h3>
                 <button onClick={onLogout} style={styles.logoutBtn}>Logout Admin 🚪</button>
             </div>
 
             <div style={styles.grid}>
-                {/* 👈 ဘယ်ဘက်ခြမ်း: Dynamic Input Form */}
                 <div style={styles.card}>
                     {editingId ? (
                         <>
@@ -196,7 +186,6 @@ const Registration = ({ onLogout }) => {
                     )}
                 </div>
 
-                {/* 👉 ညာဘက်ခြမ်း: Search Bar နှင့် Student Database Table List */}
                 <div style={styles.card}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                         <h4 style={{ color: '#fff', margin: 0 }}>📊 Verified Records ({filteredStudents.length})</h4>
